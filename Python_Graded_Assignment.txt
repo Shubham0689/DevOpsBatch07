@@ -1,0 +1,10 @@
+Git Repo Link: https://github.com/Shubham0689/DevOpsBatch07
+
+Files For Assignment: 
+
+1. password.py
+2. Cpumonitor.py
+3. Config_management.py
+4. config.ini
+5. backup.py
+6. sample.txt

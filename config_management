@@ -1,0 +1,66 @@
+import json
+import os
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+# Function to read the configuration file
+def read_config(file_path):
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"The configuration file {file_path} does not exist.")
+    
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+    
+    return lines
+
+# Function to extract key-value pairs and store them in a dictionary
+def extract_config_data(lines):
+    config_data = {}
+    current_section = None
+
+    for line in lines:  
+        line = line.strip()
+        if not line or line.startswith(';') or line.startswith('#'):
+            continue
+        if line.startswith('[') and line.endswith(']'):
+            current_section = line[1:-1]
+            config_data[current_section] = {}
+        else:
+            key, value = line.split('=', 1)
+            key = key.strip()
+            value = value.strip()
+            if current_section:
+                config_data[current_section][key] = value
+    
+    return config_data
+
+# Route to fetch the configuration data
+@app.route('/config', methods=['GET'])
+def get_config():
+    try:
+        with open('config_data.json', 'r') as json_file:
+            config_data = json.load(json_file)
+        return jsonify(config_data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Main function to handle the overall process
+def main():
+    try:
+        config_file_path = 'config.ini'
+        output_json_file = 'config_data.json'
+
+        lines = read_config(config_file_path)
+        config_data = extract_config_data(lines)
+
+        with open(output_json_file, 'w') as json_file:
+            json.dump(config_data, json_file, indent=4)
+
+        print("Configuration data extracted and saved as JSON.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    main()
+    app.run(debug=True)
